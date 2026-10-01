@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "market-analyzer": {
+      "command": "D:\\Git Repos\\Self Sustaining\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "market_analyzer.mcp.server"],
+      "env": {}
+    },
+    "web-search": {
+      "command": "D:\\Git Repos\\Self Sustaining\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "web_search_mcp"],
+      "env": {}
+    }
+  }
+}
