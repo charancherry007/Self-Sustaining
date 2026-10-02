@@ -1,0 +1,88 @@
+# Focused Symbols Profile
+# Exactly five instruments across four asset classes, served by Twelve Data.
+# No broad universe scanning — the analyzer runs ONLY these symbols.
+
+id: FOCUSED_SYMBOLS
+display_name: "Focused: NAS100, US500, Gold, Silver, BTC"
+exchange: "MULTI"
+currency: "USD"
+timezone: "America/New_York"
+benchmark: "SPY"
+segments: ["equity_index", "commodity", "crypto"]
+min_history_candles: 40
+max_candidates: 5
+timeframes:
+  intraday: "15m"          # entry/exit timeframe
+  trend: "1d"              # daily trend for regime
+  intraday_multi: ["4h", "1h", "15m"]  # coarse → fine for MTF analysis
+scoring_weights:
+  trend_score: 0.35
+  momentum_score: 0.25
+  liquidity_score: 0.20
+  risk_reward_score: 0.20
+
+universe:
+  # NASDAQ-100 proxy: QQQ ETF (tracks NDX)
+  - symbol: "NAS100"
+    name: "Nasdaq-100 Index (via QQQ ETF)"
+    exchange: "NASDAQ"
+    sector: "Equity Index"
+    currency: "USD"
+    asset_class: "index"
+    provider_symbol: "QQQ"
+    timezone: "America/New_York"
+    session: "equity_us"
+    volume_kind: "consolidated"
+    proxy_of: "NDX"
+
+  # S&P 500 proxy: SPY ETF (tracks SPX)
+  - symbol: "US500"
+    name: "S&P 500 Index (via SPY ETF)"
+    exchange: "NYSE"
+    sector: "Equity Index"
+    currency: "USD"
+    asset_class: "index"
+    provider_symbol: "SPY"
+    timezone: "America/New_York"
+    session: "equity_us"
+    volume_kind: "consolidated"
+    proxy_of: "SPX"
+
+  # Gold Spot
+  - symbol: "XAUUSD"
+    name: "Gold Spot / US Dollar"
+    exchange: "COMMODITY"
+    sector: "Precious Metal"
+    currency: "USD"
+    asset_class: "commodity"
+    provider_symbol: "XAU/USD"
+    timezone: "UTC"
+    session: "fx_metals"
+    volume_kind: "tick"
+    proxy_of: null
+
+  # Silver Spot (requires Twelve Data Grow+ plan)
+  - symbol: "XAGUSD"
+    name: "Silver Spot / US Dollar"
+    exchange: "COMMODITY"
+    sector: "Precious Metal"
+    currency: "USD"
+    asset_class: "commodity"
+    provider_symbol: "XAG/USD"
+    timezone: "UTC"
+    session: "fx_metals"
+    volume_kind: "tick"
+    proxy_of: null
+
+  # Bitcoin
+  - symbol: "BTCUSD"
+    name: "Bitcoin / US Dollar"
+    exchange: "BINANCE"
+    sector: "Crypto"
+    currency: "USD"
+    asset_class: "crypto"
+    provider_symbol: "BTC/USD"
+    timezone: "UTC"
+    session: "crypto_24_7"
+    volume_kind: "venue"
+    proxy_of: null

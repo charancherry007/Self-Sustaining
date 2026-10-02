@@ -1,0 +1,42 @@
+# Conservative Risk Profile
+# Baseline profile for capital preservation with moderate growth
+
+id: CONSERVATIVE
+display_name: "Conservative Risk Profile"
+
+# Portfolio-level limits
+max_portfolio_heat_pct: 0.06          # 6% max concurrent risk
+max_single_position_pct: 0.02         # 2% per trade
+max_sector_exposure_pct: 0.10         # 10% per sector
+max_correlation_cluster_pct: 0.15     # 15% for correlated group
+
+# Regime adjustments (multiplicative on base size)
+regime_multipliers:
+  bullish: 1.0
+  bearish: 0.5
+  range_bound: 0.75
+  high_volatility: 0.3
+  unknown: 0.25
+
+# Stop / target
+stop_loss_atr_multiple: 2.0           # Stop = entry - 2*ATR (long)
+take_profit_r_multiple: 2.0           # Target = entry + 2*R
+
+# Candidate filters
+min_candidate_score: 60               # Below this -> REJECT
+min_confidence: 0.5                   # Below this -> REDUCE
+
+# Quality penalties (multiplicative)
+volume_gate_penalty: 0.5              # Multiply size by 0.5 if volume not consolidated
+session_penalty: 0.5                  # Multiply size by 0.5 if session not OPEN
+
+# Correlation
+correlation_lookback_days: 60
+correlation_threshold: 0.75
+
+# AI settings
+ai_enabled: true
+ai_model: null                        # Use default from app config
+ai_temperature: 0.1
+ai_max_tokens: 2000
+ai_timeout_seconds: 30

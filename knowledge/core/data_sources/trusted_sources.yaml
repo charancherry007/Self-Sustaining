@@ -1,0 +1,47 @@
+# Trusted web sources for the research MCP.
+# The analyzer's web adapter reads this allowlist. Anything not listed here is
+# either rejected or downgraded to the lowest trust tier.
+
+source_tiers:
+  - tier: official
+    domains:
+      # India
+      - nseindia.com
+      - bseindia.com
+      - sebi.gov.in
+      - rbi.org.in
+      - moneycontrol.com
+      - economictimes.indiatimes.com
+      - livemint.com
+      # US
+      - sec.gov
+      - investor.gov
+      - finra.org
+      - cboe.com
+      - nasdaq.com
+      - nyse.com
+    can_override_data: true
+  - tier: financial_media
+    domains:
+      - reuters.com
+      - bloomberg.com
+      - cnbctv18.com
+      - ndtvprofit.com
+      - business-standard.com
+      - cnbc.com
+      - marketwatch.com
+      - wsj.com
+      - ft.com
+      - seekingalpha.com
+    can_override_data: false
+  - tier: general
+    domains: []
+    can_override_data: false
+
+rules:
+  max_pages_per_run: 8
+  fetch_timeout_seconds: 15
+  max_chars_per_page: 4000
+  # Web content is untrusted: it may inform a downgrade, never authorise a trade.
+  content_is_untrusted: true
+  block_login_walled_content: true

@@ -28,6 +28,24 @@
 
 ---
 
+## Multi-Timeframe Analysis Implementation Plan (4H / 1H / 15m)
+
+**Objective:** Upgrade the market analyzer to fetch, analyze, and fuse signals across three timeframes — 4h (macro trend), 1h (intermediate structure), 15m (entry trigger) — while maintaining full backward compatibility.
+
+### Phase Tracking
+
+| Phase | Scope | Status | Target Files |
+|-------|-------|--------|--------------|
+| **1. Data Models** | `Timeframes.intraday_multi`, `CandleBundle`, `MultiTimeframeMetrics`, extend `Candidate` | **COMPLETED** | `models/profile.py`, `models/quote.py`, `models/analysis.py` |
+| **2. Provider Lookbacks** | Update `_MAX_LOOKBACK` for 15m (200 bars) | **COMPLETED** | `providers/twelvedata.py` |
+| **3. MTF Pipeline Core** | New `pipeline/multiframe.py` — indicators per TF, fusion logic, per-TF setup labels | **COMPLETED** | New file + `features.py` (extract helper) |
+| **4. Analyzer Integration** | Multi-TF fetch in `run()`, MTF candidate detection, trend gating | **COMPLETED** | `pipeline/analyzer.py`, `pipeline/candidates.py` |
+| **5. Ranking** | MTF scoring components (`tf_trend_agreement`, `tf_rsi_alignment`, `tf_volume_confirmation`) | **COMPLETED** | `pipeline/rank.py`, `models/profile.py` (ScoringWeights) |
+| **6. AI Enrichment** | Pass MTF data to LLM, update prompt to interpret MTF context | **COMPLETED** | `ai/openrouter.py`, `pipeline/analyzer.py` |
+| **7. Config & Docs** | Update `focused_symbols.yaml`, `AI_BOUNDARY.md`, `ENVIRONMENT.md` | **IN PROGRESS** | Config files, docs |
+
+---
+
 ## What Is Built & Verified
 
 ### Packaging Structure

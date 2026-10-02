@@ -1,0 +1,69 @@
+# Seed knowledge for INDIA_CASH_EQUITIES.
+# Format: either a single record, or a `records:` list. Each record is
+# validated against models/knowledge.py. Only `approved` records are used.
+
+records:
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: INDIA_CASH_EQUITIES
+    title: "Trade only liquid NSE large caps"
+    body: >-
+      Restrict entries to instruments whose 20-bar average volume is above
+      roughly 500,000 shares. Thin names cannot be entered or exited reliably,
+      and slippage dominates any edge.
+    source: internal
+    confidence: 0.9
+    tags: [liquidity, execution]
+
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: INDIA_CASH_EQUITIES
+    title: "Require a defined invalidation before any candidate is sent downstream"
+    body: >-
+      Every candidate must carry an invalidation level. If the invalidation is
+      more than roughly 8 percent away from the entry reference, the expected
+      reward-to-risk rarely justifies the trade after fees and slippage.
+    source: internal
+    confidence: 0.85
+    tags: [risk, structure]
+
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: INDIA_CASH_EQUITIES
+    title: "Do not open new positions into the first 15 minutes after the open"
+    body: >-
+      The opening range on Indian cash equities is dominated by auction
+      imbalance and stray orders. Prefer waiting for at least one completed
+      5-minute candle before evaluating setups.
+    source: internal
+    confidence: 0.8
+    tags: [session, timing]
+
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: INDIA_CASH_EQUITIES
+    title: "Standing instruction: no trade is a valid outcome"
+    body: >-
+      If fewer than three candidates pass every filter, return NO_TRADE rather
+      than lowering thresholds. The risk layer must be able to assume that a
+      short list means genuinely little opportunity.
+    source: internal
+    confidence: 1.0
+    tags: [discipline]
+
+  - schema_version: 1
+    kind: lesson
+    review_status: pending
+    market: INDIA_CASH_EQUITIES
+    title: "Breakout volume confirmation on 5-minute bars needs backtesting"
+    body: >-
+      Observation from early runs: breakouts with a volume ratio above roughly
+      1.5 continue better than those without. Not yet validated out of sample.
+      Keep pending until a walk-forward test is attached.
+    source: internal
+    confidence: 0.5
+    tags: [momentum, pending-validation]

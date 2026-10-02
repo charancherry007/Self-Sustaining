@@ -1,0 +1,68 @@
+# Approved Knowledge for FOCUSED_SYMBOLS.
+# Validated against models/knowledge.py. Only `approved` records are loaded into context.
+
+records:
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: FOCUSED_SYMBOLS
+    title: "Multi-asset diversification across Equities, Precious Metals, and Crypto"
+    body: >-
+      Maintain disciplined exposure separation between US equity index proxies
+      (NAS100/US500), precious metals (XAUUSD/XAGUSD), and crypto (BTCUSD). Avoid
+      over-concentrating risk in correlated assets during market-wide stress.
+    source: internal
+    confidence: 0.95
+    tags: [diversification, asset_allocation]
+
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: FOCUSED_SYMBOLS
+    title: "Precious metals safe-haven and inflation regime dynamics"
+    body: >-
+      Gold (XAUUSD) and Silver (XAGUSD) react strongly to US Dollar momentum and
+      real rates. In risk-off or stagflationary regimes, precious metals may decouple
+      from equity pullbacks; verify dollar direction before fading metals breakouts.
+    source: internal
+    confidence: 0.90
+    tags: [metals, macro]
+
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: FOCUSED_SYMBOLS
+    title: "Bitcoin 24/7 session and weekend volatility awareness"
+    body: >-
+      BTCUSD trades continuously across weekends while US equity markets and spot metals
+      observe session closures. Beware of low weekend liquidity leading to false breakouts
+      and gap adjustments into the Monday NY open.
+    source: internal
+    confidence: 0.85
+    tags: [crypto, session]
+
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: FOCUSED_SYMBOLS
+    title: "Consolidated volume confirmation via ETF proxies"
+    body: >-
+      For NAS100 and US500, volume is measured via QQQ and SPY consolidated exchange feeds.
+      Require volume ratio above 1.0 to confirm trend breakout setups; lack of volume
+      signals exhaustion or institutional indifference.
+    source: internal
+    confidence: 0.90
+    tags: [volume, breakout]
+
+  - schema_version: 1
+    kind: rule
+    review_status: approved
+    market: FOCUSED_SYMBOLS
+    title: "Strict invalidation and risk-defined stop discipline"
+    body: >-
+      Every candidate trade across indices, metals, and crypto must carry a defined
+      invalidation level derived from ATR and market structure. If invalidation exceeds
+      acceptable risk thresholds, reduce size or decline entry.
+    source: internal
+    confidence: 1.0
+    tags: [risk, discipline]

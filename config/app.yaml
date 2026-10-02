@@ -1,0 +1,59 @@
+# Runtime settings for the Market Analyzer component.
+# Tunables live here so behaviour can be adjusted without touching code.
+
+mode: analyzer_only
+
+data:
+  # Data feed strictly from Twelve Data only: no synthetic, mock, or alternative providers.
+  provider: twelvedata
+  cache_dir: data/cache
+  cache_ttl_seconds: 60
+  throttle_seconds: 0.8
+
+  # A candle older than this is treated as stale and fails validation.
+  stale_after_seconds: 900
+  max_concurrent_requests: 2
+
+  # Refuse to analyse delayed data. The analyzer must not quietly produce
+  # "real-time" analysis from a delayed feed.
+  require_realtime: true
+
+  # Volume-gated setups are disabled by default because this focused profile
+  # includes assets (FX metals, crypto) where volume is tick/venue-only, not
+  # consolidated market volume. Set true ONLY when every symbol in the profile
+  # carries consolidated volume.
+
+ai:
+  # AI layer for market and risk analysis.
+  # Credentials: OPENROUTER_API_KEY. Model configurable via OPENROUTER_MODEL.
+  enabled: true
+  # Hard cap on symbols sent to the model per run. Free-tier models are
+  # rate-limited, so this bounds cost and latency by construction.
+  max_symbols_per_run: 5
+  observations_for_lesson: 20
+  # Credentials: OPENROUTER_API_KEY. Override the model with OPENROUTER_MODEL.
+
+web_research:
+  # Off by default: market analysis must not depend on web availability.
+  enabled: false
+  # Empty = use sys.executable, so the search MCP server launches in THIS
+  # virtualenv. Set an absolute path only if you must pin a specific interpreter.
+  mcp_command: ""
+  mcp_args: ["-m", "web_search_mcp"]
+  max_results_per_query: 5
+  freshness_hours: 24
+  timeout_seconds: 30
+
+knowledge:
+  core_directory: knowledge/core
+  cases_directory: knowledge/cases
+  approved_only: true
+  max_context_items: 20
+
+output:
+  directory: runs
+  retain_runs: 200
+
+logging:
+  directory: logs
+  level: info
