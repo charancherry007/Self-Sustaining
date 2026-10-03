@@ -60,7 +60,7 @@ def test_log_functions_emit_output() -> None:
 
 def test_get_telemetry_summary() -> None:
     summary = get_telemetry_summary()
-    assert "twelvedata" in summary
+    assert "biquote" in summary
     assert "openrouter_ai" in summary
-    assert "average_duration_seconds" in summary["twelvedata"]
+    assert "average_duration_seconds" in summary["biquote"]
     assert "average_duration_seconds" in summary["openrouter_ai"]

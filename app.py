@@ -560,21 +560,16 @@ if st.session_state.get("analysis_data"):
 
         # API Performance & Latency Telemetry
         telemetry = get_telemetry_summary()
-        td_tel = telemetry.get("twelvedata", {})
-        fh_tel = telemetry.get("finnhub", {})
+        bq_tel = telemetry.get("biquote", {})
         ai_tel = telemetry.get("openrouter_ai", {})
 
         with st.expander("⚡ API Latency & Real-Time Performance", expanded=True):
-            tel_c1, tel_c2, tel_c3 = st.columns(3)
+            tel_c1, tel_c2 = st.columns(2)
             with tel_c1:
-                st.markdown("#### TwelveData API")
-                st.metric("Avg Response Time", f"{td_tel.get('average_duration_seconds', 0.0):.2f}s", f"Last: {td_tel.get('last_duration_seconds', 0.0):.2f}s")
-                st.caption(f"Requests: {td_tel.get('successful_requests', 0)} success / {td_tel.get('failed_requests', 0)} errors")
+                st.markdown("#### BiQuote API")
+                st.metric("Avg Response Time", f"{bq_tel.get('average_duration_seconds', 0.0):.2f}s", f"Last: {bq_tel.get('last_duration_seconds', 0.0):.2f}s")
+                st.caption(f"Requests: {bq_tel.get('successful_requests', 0)} success / {bq_tel.get('failed_requests', 0)} errors")
             with tel_c2:
-                st.markdown("#### Finnhub API")
-                st.metric("Avg Response Time", f"{fh_tel.get('average_duration_seconds', 0.0):.2f}s", f"Last: {fh_tel.get('last_duration_seconds', 0.0):.2f}s")
-                st.caption(f"Requests: {fh_tel.get('successful_requests', 0)} success / {fh_tel.get('failed_requests', 0)} errors")
-            with tel_c3:
                 st.markdown("#### OpenRouter AI")
                 st.metric("Avg Response Time", f"{ai_tel.get('average_duration_seconds', 0.0):.2f}s", f"Last: {ai_tel.get('last_duration_seconds', 0.0):.2f}s")
                 st.caption(f"Requests: {ai_tel.get('successful_requests', 0)} success / {ai_tel.get('failed_requests', 0)} errors")
