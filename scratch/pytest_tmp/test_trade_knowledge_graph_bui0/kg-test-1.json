@@ -1,0 +1,148 @@
+{
+  "trade_id": "kg-test-1",
+  "symbol": "EUR/USD",
+  "generated_at": "2026-10-03T06:53:58.216631Z",
+  "nodes": [
+    {
+      "id": "trade-kg-test-1",
+      "label": "LONG EUR/USD Trade",
+      "type": "trade",
+      "properties": {
+        "order_id": "kg-test-1",
+        "action": "LONG",
+        "symbol": "EUR/USD",
+        "entry_price": 1.08,
+        "exit_price": 1.092,
+        "realized_pnl_usd": 1200.0,
+        "realized_r_multiple": 3.0,
+        "duration_minutes": 45.0,
+        "exit_reason": "TP2_FULL_TARGET_HIT",
+        "mfe": 1250.0,
+        "mae": 50.0
+      }
+    },
+    {
+      "id": "strat-eur/usd",
+      "label": "Strategy: Pullback_Limit",
+      "type": "strategy",
+      "properties": {
+        "tactic": "pullback_limit",
+        "target_rr": 3.0,
+        "planned_entry": 1.08,
+        "planned_sl": 1.076,
+        "breakeven_trigger": 1.086
+      }
+    },
+    {
+      "id": "regime-bullish",
+      "label": "BULLISH Market Regime",
+      "type": "regime",
+      "properties": {
+        "regime": "BULLISH"
+      }
+    },
+    {
+      "id": "setup-eur/usd",
+      "label": "Setup: Pullback Limit",
+      "type": "setup",
+      "properties": {
+        "order_type": "limit",
+        "invalidation_rules": []
+      }
+    },
+    {
+      "id": "inst-eur/usd",
+      "label": "Asset: EUR/USD",
+      "type": "instrument",
+      "properties": {
+        "symbol": "EUR/USD"
+      }
+    },
+    {
+      "id": "outcome-kg-test-1",
+      "label": "Outcome: TP2_FULL_TARGET_HIT ($+1,200.00)",
+      "type": "outcome",
+      "properties": {
+        "exit_reason": "TP2_FULL_TARGET_HIT",
+        "breakeven_activated": true,
+        "pnl": 1200.0,
+        "r_multiple": 3.0
+      }
+    },
+    {
+      "id": "lesson-kg-test-1",
+      "label": "Lesson: Target profit scaling validated for pullback_limit.",
+      "type": "lesson",
+      "properties": {
+        "key_takeaways": [
+          "Target profit scaling validated for pullback_limit.",
+          "Fast breakeven transition successfully protected unrealized gains."
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "trade-kg-test-1",
+      "target": "strat-eur/usd",
+      "relationship": "EXECUTED_WITH",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "source": "trade-kg-test-1",
+      "target": "regime-bullish",
+      "relationship": "OCCURRED_IN",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "source": "trade-kg-test-1",
+      "target": "setup-eur/usd",
+      "relationship": "TRIGGERED_BY",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "source": "trade-kg-test-1",
+      "target": "inst-eur/usd",
+      "relationship": "TRADED_ON",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "source": "trade-kg-test-1",
+      "target": "outcome-kg-test-1",
+      "relationship": "RESULTED_IN",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "source": "outcome-kg-test-1",
+      "target": "lesson-kg-test-1",
+      "relationship": "PRODUCED_LESSON",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "source": "lesson-kg-test-1",
+      "target": "strat-eur/usd",
+      "relationship": "ADAPTS_STRATEGY",
+      "weight": 1.0,
+      "properties": {}
+    }
+  ],
+  "executive_summary": "Trade on EUR/USD achieved positive outcome (+3.00R) via TP2_FULL_TARGET_HIT under BULLISH conditions. Asymmetric risk management locked in profits with zero downside exposure.",
+  "lessons_learned": [
+    "Target profit scaling validated for pullback_limit.",
+    "Fast breakeven transition successfully protected unrealized gains."
+  ],
+  "performance_metrics": {
+    "realized_pnl_usd": 1200.0,
+    "realized_r_multiple": 3.0,
+    "duration_minutes": 45.0,
+    "breakeven_activated": true,
+    "max_favorable_excursion": 1250.0,
+    "max_adverse_excursion": 50.0
+  }
+}

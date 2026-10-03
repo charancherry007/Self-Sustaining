@@ -52,6 +52,10 @@ class Candidate(BaseModel):
     invalidation: float | None = None
     confidence: float = Field(ge=0, le=1)
 
+    # Breakout and Liquidation Points
+    breakout_price: float | None = None
+    liquidation_points: dict[str, float] = Field(default_factory=dict)
+
     rationale: list[str] = Field(default_factory=list)
     metrics: dict[str, float] = Field(default_factory=dict)
     sources: list[str] = Field(default_factory=list)

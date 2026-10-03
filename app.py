@@ -324,13 +324,21 @@ if st.session_state.get("analysis_data"):
             st.markdown("##### Detected Setups")
             cand_data = []
             for c in analysis.candidates:
+                def _fmt_lvl(val: float | None) -> str:
+                    if val is None:
+                        return "-"
+                    return f"${val:,.2f}" if abs(val) >= 10 else f"${val:,.4f}"
+
                 cand_data.append(
                     {
                         "Symbol": c.symbol,
                         "Side": c.side.value.upper(),
                         "Setup": c.setup.value,
                         "Score": round(c.score, 1),
-                        "Last Price": f"${c.last_price:,.2f}",
+                        "Last Price": _fmt_lvl(c.last_price),
+                        "Breakout Price": _fmt_lvl(c.breakout_price) if c.breakout_price is not None else "-",
+                        "Upper Liq (Shorts)": _fmt_lvl(c.liquidation_points.get("upper")) if c.liquidation_points else "-",
+                        "Lower Liq (Longs)": _fmt_lvl(c.liquidation_points.get("lower")) if c.liquidation_points else "-",
                         "Confidence": f"{c.confidence:.0%}",
                         "RSI": round(c.metrics.get("rsi_14", 0.0), 1)
                         if "rsi_14" in c.metrics
@@ -341,6 +349,27 @@ if st.session_state.get("analysis_data"):
                     }
                 )
             st.dataframe(cand_data, width="stretch")
+
+            # Structural Liquidity Pools & Liquidation Map
+            with st.expander("🌊 Structural Liquidity Pools & Liquidation Map", expanded=False):
+                st.caption(
+                    "Liquidation points show estimated clusters where stops and leveraged margin calls accumulate. "
+                    "Upper pool = Buy-side liquidity (short squeeze target); Lower pool = Sell-side liquidity (long squeeze target)."
+                )
+                for c in analysis.candidates:
+                    u_liq = c.liquidation_points.get("upper") if c.liquidation_points else None
+                    l_liq = c.liquidation_points.get("lower") if c.liquidation_points else None
+                    u_cl = c.liquidation_points.get("short_cluster") if c.liquidation_points else None
+                    l_cl = c.liquidation_points.get("long_cluster") if c.liquidation_points else None
+                    bo_str = _fmt_lvl(c.breakout_price) if c.breakout_price is not None else "N/A"
+                    
+                    st.markdown(
+                        f"• **{c.symbol}** (`{c.side.value.upper()}` • `{c.setup.value}`) | "
+                        f"**Last:** `{_fmt_lvl(c.last_price)}` | "
+                        f"**Breakout Level:** `{bo_str}` | "
+                        f"🔴 **Short Liq (Buy Pool):** `{_fmt_lvl(u_liq)}` *(cluster: `{_fmt_lvl(u_cl)}`)* | "
+                        f"🟢 **Long Liq (Sell Pool):** `{_fmt_lvl(l_liq)}` *(cluster: `{_fmt_lvl(l_cl)}`)*"
+                    )
         else:
             st.write("No actionable technical setups detected for current parameters.")
 
@@ -425,6 +454,17 @@ if st.session_state.get("analysis_data"):
 
             for pb in plan.playbooks:
                 badge_class = "badge-long" if pb.action == "LONG" else "badge-short"
+                cand_match = next((c for c in analysis.candidates if c.symbol == pb.symbol), None)
+                pills_html = f'<span class="metric-pill">Order: {pb.order_type.value.upper()}</span><span class="metric-pill">Target R:R: {pb.risk_reward_ratio:.1f} : 1</span>'
+                if cand_match:
+                    if cand_match.breakout_price:
+                        bo_fmt = f"${cand_match.breakout_price:,.2f}" if cand_match.breakout_price >= 10 else f"${cand_match.breakout_price:,.4f}"
+                        pills_html += f'<span class="metric-pill" title="Momentum Breakout Trigger">Breakout: {bo_fmt}</span>'
+                    if cand_match.liquidation_points and "upper" in cand_match.liquidation_points and "lower" in cand_match.liquidation_points:
+                        u_fmt = f"${cand_match.liquidation_points['upper']:,.2f}" if cand_match.liquidation_points['upper'] >= 10 else f"${cand_match.liquidation_points['upper']:,.4f}"
+                        l_fmt = f"${cand_match.liquidation_points['lower']:,.2f}" if cand_match.liquidation_points['lower'] >= 10 else f"${cand_match.liquidation_points['lower']:,.4f}"
+                        pills_html += f'<span class="metric-pill" title="Short / Long Liquidation Bounds">Liq: {l_fmt} - {u_fmt}</span>'
+
                 with st.container():
                     st.markdown(
                         f"""
@@ -436,8 +476,7 @@ if st.session_state.get("analysis_data"):
                                     <span style="color: #64748B; margin-left: 0.5rem;">({pb.tactic.value.replace('_', ' ').title()})</span>
                                 </div>
                                 <div>
-                                    <span class="metric-pill">Order: {pb.order_type.value.upper()}</span>
-                                    <span class="metric-pill">Target R:R: {pb.risk_reward_ratio:.1f} : 1</span>
+                                    {pills_html}
                                 </div>
                             </div>
                         """,

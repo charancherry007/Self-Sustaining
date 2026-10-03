@@ -325,6 +325,7 @@ class MarketAnalyzer:
                 last_price,
                 allow_volume_gates=volume_gates,
                 source=self.provider.name,
+                candles=entry_candles,
             )
             if candidate:
                 candidates.append(candidate)
@@ -428,6 +429,8 @@ class MarketAnalyzer:
                         "side": c.side.value,
                         "score": c.score,
                         "last_price": c.last_price,
+                        "breakout_price": c.breakout_price,
+                        "liquidation_points": c.liquidation_points,
                         "metrics": c.metrics,
                         # NEW: MTF context
                         "mtf": {
@@ -493,6 +496,8 @@ class MarketAnalyzer:
                         "side": c.side.value,
                         "score": c.score,
                         "price": c.last_price,
+                        "breakout_price": c.breakout_price,
+                        "liquidation_points": c.liquidation_points,
                     }
                     for c in top
                 ],

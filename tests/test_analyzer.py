@@ -160,3 +160,111 @@ def test_detect_candidate_rejects_thin_volume():
         "ret_5": 0.01,
     }
     assert detect_candidate(instrument, metrics, last_price=101.0) is None
+
+
+def test_detect_candidate_momentum_breakout_and_liquidation_points():
+    from market_analyzer.models.analysis import SetupType
+    from market_analyzer.models.profile import Instrument
+
+    instrument = Instrument(symbol="BTCUSD", name="Bitcoin")
+    metrics = {
+        "rsi_14": 65.0,
+        "volume_ratio": 2.2,
+        "sma_20": 80000.0,
+        "sma_50": 78000.0,
+        "ema_12": 81000.0,
+        "ema_26": 79500.0,
+        "close": 82500.0,
+        "atr_pct": 2.5,
+        "atr_14": 2000.0,
+        "range_20_high": 83000.0,
+        "range_20_low": 77000.0,
+        "volatility_20": 0.2,
+        "pct_from_high_20": -0.2,
+        "ret_5": 0.03,
+    }
+    cand = detect_candidate(instrument, metrics, last_price=82500.0, allow_volume_gates=True)
+    assert cand is not None
+    assert cand.setup == SetupType.MOMENTUM_BREAKOUT
+    assert cand.breakout_price == 83000.0
+    assert cand.liquidation_points is not None
+    assert cand.liquidation_points["upper"] > cand.last_price
+    assert cand.liquidation_points["lower"] < cand.last_price
+    assert "short_cluster" in cand.liquidation_points
+    assert "long_cluster" in cand.liquidation_points
+
+
+def test_detect_candidate_mtf_preserves_breakout_and_liquidation():
+    from market_analyzer.models.analysis import MultiTimeframeMetrics, SetupType
+    from market_analyzer.models.profile import Instrument
+    from market_analyzer.pipeline.multiframe import detect_candidate_mtf
+
+    instrument = Instrument(symbol="BTCUSD", name="Bitcoin")
+    entry_metrics = {
+        "rsi_14": 65.0,
+        "volume_ratio": 2.0,
+        "sma_20": 80000.0,
+        "sma_50": 78000.0,
+        "ema_12": 81000.0,
+        "ema_26": 79500.0,
+        "close": 82500.0,
+        "atr_pct": 2.5,
+        "atr_14": 2000.0,
+        "range_20_high": 83000.0,
+        "range_20_low": 77000.0,
+        "volatility_20": 0.2,
+        "pct_from_high_20": -0.2,
+        "ret_5": 0.03,
+    }
+    mtf_metrics_obj = MultiTimeframeMetrics(
+        entry_timeframe="15m",
+        by_timeframe={"15m": entry_metrics, "1h": entry_metrics, "4h": entry_metrics},
+        fused={"tf_trend_agreement": 1.0, "tf_rsi_alignment": 1.0},
+        dominant_trend="bullish",
+        mtf_setup={"15m": SetupType.MOMENTUM_BREAKOUT, "1h": SetupType.MOMENTUM_BREAKOUT, "4h": SetupType.MOMENTUM_BREAKOUT},
+    )
+
+    cand = detect_candidate_mtf(
+        instrument=instrument,
+        mtf_metrics_obj=mtf_metrics_obj,
+        last_price=82500.0,
+        allow_volume_gates=True,
+    )
+    assert cand is not None
+    assert cand.setup == SetupType.MOMENTUM_BREAKOUT
+    assert cand.breakout_price == 83000.0
+    assert cand.liquidation_points["upper"] > cand.last_price
+    assert cand.liquidation_points["lower"] < cand.last_price
+
+
+def test_detect_candidate_non_breakout_has_none_breakout_price():
+    from market_analyzer.models.analysis import SetupType
+    from market_analyzer.models.profile import Instrument
+
+    instrument = Instrument(symbol="AAPL", name="Apple")
+    metrics = {
+        "rsi_14": 55.0,
+        "volume_ratio": 1.1,
+        "sma_20": 200.0,
+        "sma_50": 195.0,
+        "ema_12": 202.0,
+        "ema_26": 198.0,
+        "close": 205.0,
+        "atr_pct": 1.5,
+        "atr_14": 3.0,
+        "range_20_high": 208.0,
+        "range_20_low": 198.0,
+        "volatility_20": 0.15,
+        "pct_from_high_20": -1.4,
+        "ret_5": 0.02,
+    }
+    cand = detect_candidate(instrument, metrics, last_price=205.0, allow_volume_gates=False)
+    assert cand is not None
+    assert cand.setup == SetupType.TREND_CONTINUATION
+    assert cand.breakout_price is None
+    assert cand.liquidation_points is not None
+    assert cand.liquidation_points["upper"] > cand.last_price
+    assert cand.liquidation_points["lower"] < cand.last_price
+
+
+

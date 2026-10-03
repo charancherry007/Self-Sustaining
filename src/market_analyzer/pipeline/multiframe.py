@@ -166,6 +166,7 @@ def detect_candidate_mtf(
     last_price: float,
     allow_volume_gates: bool = True,
     source: str = "provider",
+    candles: list | None = None,
 ):
     """
     Multi-timeframe candidate detection.
@@ -219,6 +220,7 @@ def detect_candidate_mtf(
         last_price,
         allow_volume_gates=allow_volume_gates,
         source=source,
+        candles=candles,
     )
     if candidate:
         # Attach MTF data

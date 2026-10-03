@@ -33,6 +33,70 @@ def _trend_alignment(m: dict[str, float]) -> float:
     return score
 
 
+def compute_liquidation_points(
+    metrics: dict[str, float],
+    last_price: float,
+    candles: list[Any] | None = None,
+) -> dict[str, float]:
+    """Calculate structural liquidation points and liquidity pool levels.
+
+    Liquidation points represent structural price thresholds where stop-loss orders
+    and leveraged position liquidations cluster:
+      - Upper Liquidation (Buy-Side Liquidity / Short Liquidation Pool):
+        Clustered just above recent swing highs / resistance (range_20_high + buffer).
+      - Lower Liquidation (Sell-Side Liquidity / Long Liquidation Pool):
+        Clustered just below recent swing lows / support (range_20_low - buffer).
+      - Estimated 50x high-leverage liquidation boundaries.
+    """
+    atr = metrics.get("atr_14", 0.0)
+    if atr <= 0:
+        atr = last_price * 0.015
+
+    range_high = float(metrics.get("range_20_high", last_price))
+    range_low = float(metrics.get("range_20_low", last_price))
+
+    if candles and len(candles) >= 10:
+        highs = [float(getattr(c, "high", last_price)) for c in candles[-20:]]
+        lows = [float(getattr(c, "low", last_price)) for c in candles[-20:]]
+        if highs:
+            range_high = max(highs)
+        if lows:
+            range_low = min(lows)
+
+    # Upper liquidation pool: short stop/margin liquidation cluster sitting above swing high
+    upper_liq = max(range_high + (0.25 * atr), last_price * 1.002)
+    # Lower liquidation pool: long stop/margin liquidation cluster sitting below swing low
+    lower_liq = min(range_low - (0.25 * atr), last_price * 0.998)
+
+    # High leverage 50x estimates
+    est_50x_short = last_price * 1.02
+    est_50x_long = last_price * 0.98
+
+    decimals = 2 if last_price >= 10 else 4
+    return {
+        "upper": round(upper_liq, decimals),
+        "lower": round(lower_liq, decimals),
+        "short_cluster": round(max(upper_liq, est_50x_short), decimals),
+        "long_cluster": round(min(lower_liq, est_50x_long), decimals),
+    }
+
+
+def compute_breakout_price(
+    setup: SetupType,
+    side: Side,
+    metrics: dict[str, float],
+    last_price: float,
+) -> float | None:
+    """Return the structural breakout price level for momentum breakout setups."""
+    if setup == SetupType.MOMENTUM_BREAKOUT:
+        if side == Side.SHORT:
+            val = float(metrics.get("range_20_low", last_price))
+        else:
+            val = float(metrics.get("range_20_high", last_price))
+        return round(val, 2 if val >= 10 else 4)
+    return None
+
+
 def detect_candidate(
     instrument: Instrument,
     metrics: dict[str, float],
@@ -40,6 +104,7 @@ def detect_candidate(
     news_sentiment: float | None = None,
     allow_volume_gates: bool = True,
     source: str = "provider",
+    candles: list[Any] | None = None,
 ) -> Candidate | None:
     """Return a candidate if the setup qualifies, else None.
 
@@ -121,6 +186,9 @@ def detect_candidate(
         return None
 
     confidence = min(max((abs(trend) + 0.5) / 1.5, 0.0), 1.0)
+    breakout_price = compute_breakout_price(setup, side, metrics, last_price)
+    liquidation_points = compute_liquidation_points(metrics, last_price, candles=candles)
+
     metrics_out = {
         "rsi_14": rsi,
         "trend_alignment": trend,
@@ -131,7 +199,17 @@ def detect_candidate(
         "sma_50": metrics["sma_50"],
         "pct_from_high_20": from_high,
         "ret_5": ret_5,
+        "liquidation_upper": liquidation_points["upper"],
+        "liquidation_lower": liquidation_points["lower"],
     }
+    if breakout_price is not None:
+        metrics_out["breakout_price"] = breakout_price
+        rationale.append(
+            f"breakout price: ${breakout_price:,.2f}"
+            if breakout_price >= 10
+            else f"breakout price: ${breakout_price:,.4f}"
+        )
+
     if news_sentiment is not None:
         metrics_out["news_sentiment"] = news_sentiment
         # Strong negative news downgrades an otherwise long setup to watch.
@@ -150,6 +228,8 @@ def detect_candidate(
         entry_reference=last_price,
         invalidation=invalidation,
         confidence=confidence,
+        breakout_price=breakout_price,
+        liquidation_points=liquidation_points,
         rationale=rationale + volume_notes,
         metrics=metrics_out,
         sources=[source],
