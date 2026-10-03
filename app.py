@@ -191,12 +191,10 @@ with col_provider:
     provider_choice = st.selectbox(
         "Data Feed Provider",
         options=[
-            "Twelve Data (Auto-fallback to Finnhub)",
-            "Twelve Data",
-            "Finnhub",
+            "Biquote (Market Feed)",
         ],
         index=0,
-        help="Select market data feed. Auto-fallback seamlessly switches to Finnhub if Twelve Data rate limits are reached.",
+        help="Default real-time multi-asset market data feed powered by Biquote API.",
     )
 
 with col_equity:
@@ -249,13 +247,7 @@ if analyze_clicked:
     with st.spinner(f"Executing Market Analyzer, AI Risk Engine, & Strategy Planner for {active_label}..."):
         try:
             # 1. Market Analyzer
-            provider_mode = "twelvedata_fallback"
-            if "Twelve Data (Auto-fallback" in provider_choice:
-                provider_mode = "twelvedata_fallback"
-            elif provider_choice == "Twelve Data":
-                provider_mode = "twelvedata"
-            elif provider_choice == "Finnhub":
-                provider_mode = "finnhub"
+            provider_mode = "biquote"
 
             provider_inst = build_provider(config, provider_override=provider_mode)
             analyzer = MarketAnalyzer(config=config, provider=provider_inst)

@@ -60,35 +60,27 @@ class DataConfig(BaseModel):
 
     # No synthetic/mock provider is selectable. Every configured provider must
     # return real market data or the run fails.
-    provider: str = "twelvedata"
+    provider: str = "biquote"
     cache_dir: str = "data/cache"
     cache_ttl_seconds: int = Field(default=60, ge=0)
-    throttle_seconds: float = Field(default=0.5, ge=0)
+    throttle_seconds: float = Field(default=0.1, ge=0)
     stale_after_seconds: int = Field(default=900, ge=30)
     max_concurrent_requests: int = Field(default=4, ge=1, le=32)
     # When True, the run aborts unless the provider is genuinely real-time.
     require_realtime: bool = True
 
-    # Twelve Data API key. If not set here, TWELVEDATA_API_KEY env var is used.
+    # Optional legacy keys
     twelvedata_api_key: str | None = None
     finnhub_api_key: str | None = None
 
     @model_validator(mode="after")
     def _known_provider(self) -> DataConfig:
-        allowed = {"twelvedata", "finnhub", "twelvedata_fallback", "fallback"}
+        allowed = {"biquote"}
         if self.provider not in allowed:
             raise ValueError(
                 f"provider must be one of {allowed}, got {self.provider!r}. "
-                "Only Twelve Data, Finnhub, or Fallback data feeds are permitted."
+                "Only Biquote data feed is permitted."
             )
-        td_key = self.twelvedata_api_key or os.getenv("TWELVEDATA_API_KEY")
-        fh_key = self.finnhub_api_key or os.getenv("FINNHUB_API_KEY")
-        if self.provider == "twelvedata" and not td_key:
-            raise ValueError("provider 'twelvedata' requires TWELVEDATA_API_KEY")
-        if self.provider == "finnhub" and not fh_key:
-            raise ValueError("provider 'finnhub' requires FINNHUB_API_KEY")
-        if self.provider in ("twelvedata_fallback", "fallback") and not (td_key or fh_key):
-            raise ValueError("fallback provider requires TWELVEDATA_API_KEY or FINNHUB_API_KEY")
         return self
 
 

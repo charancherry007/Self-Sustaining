@@ -1,5 +1,5 @@
 # Focused Symbols Profile
-# Exactly five instruments across four asset classes, served by Twelve Data.
+# Exactly five instruments across four asset classes, served by Biquote.
 # No broad universe scanning — the analyzer runs ONLY these symbols.
 
 id: FOCUSED_SYMBOLS
@@ -7,7 +7,7 @@ display_name: "Focused: NAS100, US500, Gold, Silver, BTC"
 exchange: "MULTI"
 currency: "USD"
 timezone: "America/New_York"
-benchmark: "SPY"
+benchmark: "SPYUSDT"
 segments: ["equity_index", "commodity", "crypto"]
 min_history_candles: 40
 max_candidates: 5
@@ -29,7 +29,7 @@ universe:
     sector: "Equity Index"
     currency: "USD"
     asset_class: "index"
-    provider_symbol: "QQQ"
+    provider_symbol: "QQQUSDT"
     timezone: "America/New_York"
     session: "equity_us"
     volume_kind: "consolidated"
@@ -42,7 +42,7 @@ universe:
     sector: "Equity Index"
     currency: "USD"
     asset_class: "index"
-    provider_symbol: "SPY"
+    provider_symbol: "SPYUSDT"
     timezone: "America/New_York"
     session: "equity_us"
     volume_kind: "consolidated"
@@ -55,20 +55,20 @@ universe:
     sector: "Precious Metal"
     currency: "USD"
     asset_class: "commodity"
-    provider_symbol: "XAU/USD"
+    provider_symbol: "XAUUSD"
     timezone: "UTC"
     session: "fx_metals"
     volume_kind: "tick"
     proxy_of: null
 
-  # Silver Spot (requires Twelve Data Grow+ plan)
+  # Silver Spot
   - symbol: "XAGUSD"
     name: "Silver Spot / US Dollar"
     exchange: "COMMODITY"
     sector: "Precious Metal"
     currency: "USD"
     asset_class: "commodity"
-    provider_symbol: "XAG/USD"
+    provider_symbol: "XAGUSD"
     timezone: "UTC"
     session: "fx_metals"
     volume_kind: "tick"
@@ -81,7 +81,7 @@ universe:
     sector: "Crypto"
     currency: "USD"
     asset_class: "crypto"
-    provider_symbol: "BTC/USD"
+    provider_symbol: "BTCUSD"
     timezone: "UTC"
     session: "crypto_24_7"
     volume_kind: "venue"

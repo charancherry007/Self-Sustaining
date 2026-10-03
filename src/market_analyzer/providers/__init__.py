@@ -5,15 +5,11 @@ from market_analyzer.providers.base import (
     ProviderCapabilities,
     ProviderError,
 )
-from market_analyzer.providers.fallback import FallbackDataProvider
-from market_analyzer.providers.finnhub import FinnhubDataProvider
-from market_analyzer.providers.twelvedata import TwelveDataProvider
+from market_analyzer.providers.biquote import BiquoteProvider
 
 __all__ = [
-    "FallbackDataProvider",
-    "FinnhubDataProvider",
+    "BiquoteProvider",
     "MarketDataProvider",
     "ProviderCapabilities",
     "ProviderError",
-    "TwelveDataProvider",
 ]

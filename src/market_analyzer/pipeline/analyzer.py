@@ -58,43 +58,20 @@ def build_provider(
     config: AppConfig,
     provider_override: str | None = None,
 ) -> MarketDataProvider:
-    """Instantiate the configured market data provider (Twelve Data, Finnhub, or Fallback)."""
-    import os
-
-    from market_analyzer.providers.fallback import FallbackDataProvider
-    from market_analyzer.providers.finnhub import FinnhubDataProvider
-    from market_analyzer.providers.twelvedata import TwelveDataProvider
+    """Instantiate the configured market data provider (Biquote)."""
+    from market_analyzer.providers.biquote import BiquoteProvider
 
     name = (provider_override or config.data.provider).lower()
-    td_key = config.data.twelvedata_api_key or os.getenv("TWELVEDATA_API_KEY", "")
-    fh_key = config.data.finnhub_api_key or os.getenv("FINNHUB_API_KEY", "")
 
-    if name in ("twelvedata_fallback", "fallback"):
-        primary = TwelveDataProvider(
-            api_key=td_key,
-            throttle_seconds=config.data.throttle_seconds,
-        )
-        secondary = FinnhubDataProvider(
-            api_key=fh_key,
-            throttle_seconds=config.data.throttle_seconds,
-        )
-        return FallbackDataProvider(primary=primary, secondary=secondary)
-
-    if name == "twelvedata":
-        return TwelveDataProvider(
-            api_key=td_key,
-            throttle_seconds=config.data.throttle_seconds,
-        )
-
-    if name == "finnhub":
-        return FinnhubDataProvider(
-            api_key=fh_key,
+    if name == "biquote":
+        return BiquoteProvider(
             throttle_seconds=config.data.throttle_seconds,
         )
 
     raise ValueError(
-        f"Data provider must be 'twelvedata', 'finnhub', or 'twelvedata_fallback', got {name!r}."
+        f"Data provider must be 'biquote', got {name!r}."
     )
+
 
 
 def build_research_provider(config: AppConfig) -> WebResearchProvider:
@@ -190,10 +167,10 @@ class MarketAnalyzer:
                 f"Market analyzer only supports focused symbols ({', '.join(sorted(allowed_symbols))}), "
                 f"Forex currency pairs, or Crypto pairs. Unauthorized symbols detected: {', '.join(sorted(unauthorized))}"
             )
-        allowed_providers = {"twelvedata", "finnhub", "fallback"}
+        allowed_providers = {"biquote"}
         if self.provider.name not in allowed_providers and not getattr(self.provider, "name", "").endswith("test_data"):
             raise ValueError(
-                f"Market data feed must come from Twelve Data, Finnhub, or Fallback provider, got provider {self.provider.name!r}."
+                f"Market data feed must come from Biquote provider, got provider {self.provider.name!r}."
             )
 
         if self.config.data.require_realtime and not self.provider.realtime:
@@ -458,7 +435,7 @@ class MarketAnalyzer:
                             "trend_agreement": c.mtf_metrics.fused.get("tf_trend_agreement") if c.mtf_metrics else None,
                             "rsi_alignment": c.mtf_metrics.fused.get("tf_rsi_alignment") if c.mtf_metrics else None,
                             "volume_confirmation": c.mtf_metrics.fused.get("tf_volume_confirmation") if c.mtf_metrics else None,
-                            "per_tf_setups": {tf: s.value for tf, s in c.mtf_setup.items()} if c.mtf_setup else {},
+                            "per_tf_setups": {tf: (s.value if hasattr(s, "value") else str(s)) for tf, s in c.mtf_setup.items() if s is not None} if c.mtf_setup else {},
                             "entry_timeframe": c.mtf_metrics.entry_timeframe if c.mtf_metrics else "15m",
                         } if c.mtf_metrics else None,
                     }

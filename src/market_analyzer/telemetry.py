@@ -46,6 +46,7 @@ class ApiMetricsTracker:
 
 
 # Service-level metric trackers
+_biquote_tracker = ApiMetricsTracker("Biquote API")
 _twelvedata_tracker = ApiMetricsTracker("TwelveData API")
 _finnhub_tracker = ApiMetricsTracker("Finnhub API")
 _ai_tracker = ApiMetricsTracker("OpenRouter AI")
@@ -53,6 +54,8 @@ _ai_tracker = ApiMetricsTracker("OpenRouter AI")
 
 def _get_tracker(service: str) -> ApiMetricsTracker:
     s_lower = service.lower()
+    if "biquote" in s_lower:
+        return _biquote_tracker
     if "twelve" in s_lower:
         return _twelvedata_tracker
     if "finnhub" in s_lower:
@@ -112,6 +115,13 @@ def log_api_error(
 def get_telemetry_summary() -> dict[str, dict[str, float | int]]:
     """Return summary dictionary of all recorded latency metrics."""
     return {
+        "biquote": {
+            "total_requests": _biquote_tracker.total_requests,
+            "successful_requests": _biquote_tracker.successful_requests,
+            "failed_requests": _biquote_tracker.failed_requests,
+            "average_duration_seconds": round(_biquote_tracker.average_duration_seconds, 3),
+            "last_duration_seconds": round(_biquote_tracker.last_duration_seconds, 3),
+        },
         "twelvedata": {
             "total_requests": _twelvedata_tracker.total_requests,
             "successful_requests": _twelvedata_tracker.successful_requests,

@@ -4,11 +4,11 @@
 mode: analyzer_only
 
 data:
-  # Data feed strictly from Twelve Data only: no synthetic, mock, or alternative providers.
-  provider: twelvedata
+  # Data feed from Biquote API: no synthetic or mock providers.
+  provider: biquote
   cache_dir: data/cache
   cache_ttl_seconds: 60
-  throttle_seconds: 0.8
+  throttle_seconds: 0.1
 
   # A candle older than this is treated as stale and fails validation.
   stale_after_seconds: 900
